@@ -56,9 +56,9 @@ export default function Home() {
       }}
     >
       <header style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 22 }}>Shop Console</h1>
+        <h1 style={{ margin: 0, fontSize: 22 }}>Connection</h1>
         <p style={{ color: "var(--muted)", marginTop: 4 }}>
-          Phase 1 — read-only connection health check
+          Read-only Shopify connection health check
         </p>
       </header>
 
