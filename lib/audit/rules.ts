@@ -174,7 +174,7 @@ export function auditProduct(p: AuditProduct): Finding[] {
             `missing-${i}`,
             "medium",
             `Image ${i + 1} has no alt text (hurts accessibility and image SEO).`,
-            { field: `media[${i}].alt`, current: null },
+            { field: `media[${i}].alt`, current: null, mediaId: img.mediaId },
           ),
         );
       } else if (
@@ -188,7 +188,7 @@ export function auditProduct(p: AuditProduct): Finding[] {
             `generic-${i}`,
             "low",
             `Image ${i + 1} alt text is generic ("${alt}"); describe what's actually shown.`,
-            { field: `media[${i}].alt`, current: alt },
+            { field: `media[${i}].alt`, current: alt, mediaId: img.mediaId },
           ),
         );
       } else if (alt.length > ALT_MAX) {
@@ -199,7 +199,7 @@ export function auditProduct(p: AuditProduct): Finding[] {
             `long-${i}`,
             "low",
             `Image ${i + 1} alt text is long (${alt.length} chars); keep it concise (≤ ${ALT_MAX}).`,
-            { field: `media[${i}].alt`, current: alt },
+            { field: `media[${i}].alt`, current: alt, mediaId: img.mediaId },
           ),
         );
       }

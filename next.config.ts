@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Phase 1 is intentionally minimal. Native/server-only packages (better-sqlite3,
-  // the Agent SDK, etc.) get added to `serverExternalPackages` when we introduce them.
+  // better-sqlite3 is a native module; keep it out of the bundler.
+  serverExternalPackages: ["better-sqlite3"],
 };
 
 export default nextConfig;

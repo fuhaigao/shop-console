@@ -33,6 +33,8 @@ export interface Finding {
   message: string;
   /** The API field this concerns, e.g. "seo.title", "media[2].alt". */
   field?: string;
+  /** For image_alt findings: the MediaImage/File id to target on write. */
+  mediaId?: string | null;
   /** Current value, for the before/after diff. */
   current?: string | null;
   /** AI-proposed replacement, for the before/after diff. Filled only when suggestions run. */

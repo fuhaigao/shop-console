@@ -153,6 +153,65 @@ function normalize(raw: RawAuditProduct): AuditProduct {
   };
 }
 
+// ── Current field values (for pre-write snapshot + provenance old-values) ──────
+
+export interface ProductFields {
+  id: string;
+  title: string;
+  descriptionHtml: string;
+  productType: string;
+  tags: string[];
+  seoTitle: string | null;
+  seoDescription: string | null;
+  imageAlts: { mediaId: string; alt: string | null }[];
+}
+
+const PRODUCT_FIELDS_QUERY = `
+  query ProductFields($id: ID!) {
+    product(id: $id) {
+      id
+      title
+      descriptionHtml
+      productType
+      tags
+      seo { title description }
+      media(first: 50) {
+        nodes { ... on MediaImage { id alt } }
+      }
+    }
+  }
+`;
+
+/** Fetch the current writable field values for one product. Read-only. */
+export async function getProductFields(productId: string): Promise<ProductFields | null> {
+  const data = await adminGraphQL<{
+    product: {
+      id: string;
+      title: string;
+      descriptionHtml: string | null;
+      productType: string | null;
+      tags: string[];
+      seo: { title: string | null; description: string | null };
+      media: { nodes: { id?: string; alt?: string | null }[] };
+    } | null;
+  }>(PRODUCT_FIELDS_QUERY, { id: productId });
+
+  const p = data.product;
+  if (!p) return null;
+  return {
+    id: p.id,
+    title: p.title,
+    descriptionHtml: p.descriptionHtml ?? "",
+    productType: p.productType ?? "",
+    tags: p.tags ?? [],
+    seoTitle: p.seo?.title ?? null,
+    seoDescription: p.seo?.description ?? null,
+    imageAlts: (p.media?.nodes ?? [])
+      .filter((n) => n.id)
+      .map((n) => ({ mediaId: n.id as string, alt: n.alt ?? null })),
+  };
+}
+
 /**
  * Fetch up to `limit` most-recently-updated products with all audit-relevant
  * fields, paginating in pages of 50. Read-only.

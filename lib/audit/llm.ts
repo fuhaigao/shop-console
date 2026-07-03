@@ -15,21 +15,23 @@ import { claudeOneShot, parseJsonLoose } from "@/lib/claude";
 import { SEO_TITLE_MAX, SEO_DESC_MIN, SEO_DESC_MAX, ALT_MAX } from "./rules";
 import type { AuditProduct, Finding } from "./types";
 
-const SYSTEM = `You are an expert Shopify merchandiser and SEO copywriter auditing one product.
+const SYSTEM = `You are an expert Shopify merchandiser and SEO copywriter auditing one product. The goal is to improve search visibility and sales.
 Return ONLY raw JSON (no markdown fences, no prose) matching exactly this shape:
 {
   "description": string | null,       // improved product description as plain text paragraphs, or null if the current one is already good
-  "seoTitle": string | null,          // <= ${SEO_TITLE_MAX} chars, or null
-  "seoDescription": string | null,    // ${SEO_DESC_MIN}-${SEO_DESC_MAX} chars, or null
-  "imageAlts": [ { "mediaId": string, "alt": string } ],  // alt text (<= ${ALT_MAX} chars) for images that need it; [] if none
+  "seoTitle": string | null,          // meta <title>, <= ${SEO_TITLE_MAX} chars, lead with the most searchable terms; or null
+  "seoDescription": string | null,    // meta description, ${SEO_DESC_MIN}-${SEO_DESC_MAX} chars, benefit-driven with a soft call to action; or null
+  "productType": string | null,       // a concise, standard product category (e.g. "Ring", "Necklace"); or null
+  "imageAlts": [ { "mediaId": string, "alt": string } ],  // alt text (<= ${ALT_MAX} chars) describing what the image shows, for images that need it; [] if none
   "notes": [ string ]                 // short qualitative observations (voice, clarity, trust signals); [] if none
 }
-Rules: write in a concise, natural, benefit-driven voice. NEVER keyword-stuff. Only propose a field when you can genuinely improve it; otherwise use null. Base copy strictly on the product data given — do not invent specs, materials, or claims.`;
+Rules: write in a concise, natural, benefit-driven voice. NEVER keyword-stuff. Only propose a field when you can genuinely improve it; otherwise use null. Base copy strictly on the product data given — do not invent specs, materials, gemstone origins, or claims you can't infer from the title/type. Optimize the seo.title and seo.description (meta fields), not the storefront product title.`;
 
 interface LlmProposal {
   description: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
+  productType: string | null;
   imageAlts: { mediaId: string; alt: string }[];
   notes: string[];
 }
@@ -105,6 +107,13 @@ function mergeProposal(
     p.seoDescription,
     "AI suggests a meta description.",
   );
+  attachOrCreate(
+    "product_type",
+    proposal.productType,
+    "productType",
+    p.productType || null,
+    "AI suggests a product type.",
+  );
 
   // Image alts: match by mediaId to the corresponding image_alt finding.
   for (const { mediaId, alt } of proposal.imageAlts ?? []) {
@@ -126,6 +135,7 @@ function mergeProposal(
         source: "ai",
         message: `AI suggests alt text for image ${idx + 1}.`,
         field: `media[${idx}].alt`,
+        mediaId: p.images[idx].mediaId,
         current: p.images[idx].alt,
         proposed: alt,
       });

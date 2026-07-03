@@ -24,8 +24,12 @@ export async function GET() {
       getProductSample(5),
     ]);
 
-    // Flag whether any write scope is present — Phase 1 expects read-only.
-    const hasWriteScope = tokenInfo.scopes.some((s) => s.startsWith("write_"));
+    // The only write scope this tool uses is write_products; that (not any
+    // write_* scope) is what gates the Apply flow.
+    const canWriteProducts = tokenInfo.scopes.includes("write_products");
+    const otherWriteScopes = tokenInfo.scopes.filter(
+      (s) => s.startsWith("write_") && s !== "write_products",
+    );
 
     return NextResponse.json({
       ok: true,
@@ -35,7 +39,8 @@ export async function GET() {
       auth: {
         scopes: tokenInfo.scopes,
         tokenExpiresAt: new Date(tokenInfo.expiresAt).toISOString(),
-        hasWriteScope,
+        canWriteProducts,
+        otherWriteScopes,
       },
     });
   } catch (err) {

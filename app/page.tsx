@@ -13,7 +13,12 @@ interface HealthOk {
   };
   productCount: number;
   sample: { id: string; title: string; handle: string; status: string }[];
-  auth: { scopes: string[]; tokenExpiresAt: string; hasWriteScope: boolean };
+  auth: {
+    scopes: string[];
+    tokenExpiresAt: string;
+    canWriteProducts: boolean;
+    otherWriteScopes: string[];
+  };
 }
 interface HealthErr {
   ok: false;
@@ -97,13 +102,19 @@ export default function Home() {
               value={new Date(health.auth.tokenExpiresAt).toLocaleString()}
             />
             <Row
-              label="Write access"
+              label="Product writes"
               value={
-                health.auth.hasWriteScope
-                  ? "⚠️ write scope present"
-                  : "read-only ✓ (expected in Phase 1)"
+                health.auth.canWriteProducts
+                  ? "✓ write_products granted — Apply is enabled"
+                  : "read-only (add write_products to enable Apply)"
               }
             />
+            {health.auth.otherWriteScopes.length > 0 && (
+              <Row
+                label="Other write scopes"
+                value={`⚠️ ${health.auth.otherWriteScopes.join(", ")} — not used by this tool; consider removing`}
+              />
+            )}
             {health.sample.length > 0 && (
               <div>
                 <div style={{ color: "var(--muted)", marginBottom: 6 }}>
