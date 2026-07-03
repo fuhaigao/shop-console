@@ -1,0 +1,26 @@
+{
+  "name": "shop-console",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local, single-user harness for AI-assisted auditing and enhancement of a Shopify store. Reads are broad; writes are narrow and human-gated.",
+  "scripts": {
+    "dev": "next dev -p 8788",
+    "build": "next build",
+    "start": "next start -p 8788",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.4.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20 <23"
+  }
+}
